@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: retail-creative
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/retail-creative
+      AI_SERVICE_URL: http://ai-service:8000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./:/app
+
+  ai-service:
+    build:
+      context: ../ai_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./processed_images:/app/processed_images
+      - ./generated_creatives:/app/generated_creatives
+
+volumes:
+  mongodb_data:
